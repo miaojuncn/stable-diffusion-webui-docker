@@ -3,21 +3,18 @@ name: Build Images
 on:
   push:
     branches: master
-  pull_request:
-      paths:
-        - docker-compose.yml
-        - services
 
 jobs:
   build:
-    strategy:
-      matrix:
-        profile:
-          - auto
-          - comfy
-          - download
     runs-on: ubuntu-latest
-    name: ${{ matrix.profile }}
     steps:
-      - uses: actions/checkout@v3
-      - run: docker compose --profile ${{ matrix.profile }} build --progress plain
+      - uses: actions/checkout@v4
+      - run: docker compose --profile auto build --progress plain
+      - name: DockerHub Login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.REGISRRY_USERNAME }}
+          password: ${{ secrets.REGISRRY_PASSWORD }}
+      - name: Push Image
+        run: docker push registry.cn-hangzhou.aliyuncs.com/mj-mirror/stable-diffusion-webui:78
